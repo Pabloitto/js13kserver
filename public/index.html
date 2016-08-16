@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>JS13K2016</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/shared.js"></script>
+    <script src="/client.js"></script>
+    <style>
+        div.game-container {
+            margin: auto;
+            width: 50%;
+            border: 3px solid green;
+            padding: 10px;
+        }
+        
+        canvas#canvas-game {
+            /*width: 100%;
+            height: 100%;*/
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <input id="inputName" type="text" value="" placeholder="put your name here!" />
+        <input id="btnStart" type="button" value="Start" />
+    </div>
+    <div class="game-container">
+        <canvas id="canvas-game" width="720" height="330"></canvas>
+    </div>
+</body>
+
+</html>
