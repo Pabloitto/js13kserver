@@ -14,6 +14,7 @@ function Game() {
     this.io = null;
     this.width = null;
     this.height = null;
+    this.map = null;
 }
 
 Game.prototype.users = [];
@@ -42,6 +43,13 @@ Game.prototype.addUser = function(user) {
         this.users.push(user);
         this.io.emit("newUserConnected", user);
     }
+}
+
+Game.prototype.addMap = function(map){
+    if(this.map === null){
+        this.map = map;
+    }
+    this.io.emit("updateMap", this.map);
 }
 
 Game.prototype.updatePosition = function(user) {
@@ -100,8 +108,12 @@ module.exports = function(socket) {
     socket.emit("start", game.users);
 
     socket.on("connectNewUser", function(name) {
-        console.log('connected ' + name);
+        console.log('connected ' +name);
         game.addUser(new User(name, socket.id));
+    });
+
+    socket.on("generateMap",function(map){
+        game.addMap(map);
     });
 
     socket.on("userChangePosition", function(user) {
