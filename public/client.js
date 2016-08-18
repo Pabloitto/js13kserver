@@ -1,6 +1,6 @@
 "use strict";
 
-(function () {
+(function() {
 
     var socket;
     var canvas;
@@ -15,7 +15,7 @@
         RIGHT: 39
     };
     var blockSize = 30;
-    var userSize = 10;
+    var userSize = 20;
     var MOVEMENT = {
         'UP': false,
         'DOWN': false,
@@ -24,39 +24,40 @@
     };
     var map = [];
     var mapCollition = [];
+    var speed = 2;
 
-    function getEmptyMap(){
+    function getEmptyMap() {
         var result = [];
-         for (var x = 0; x < 11; x++) {
-                var newRow = [];
-                for (var y = 0; y < 24; y++) {
-                     newRow.push(0);
-                }
-                result.push(newRow);
+        for (var x = 0; x < (canvas.width / blockSize); x++) {
+            var newRow = [];
+            for (var y = 0; y < (canvas.height / blockSize); y++) {
+                newRow.push(0);
+            }
+            result.push(newRow);
         }
         return result;
     }
 
     function initMap(m) {
-        for (var x = 0; x < 11; x++) {
-                for (var y = 0; y < 24; y++) {
-                    if(Math.random() < 0.20){
-                        m[x][y] = 1;
-                    }
+        for (var x = 0; x < (canvas.width / blockSize); x++) {
+            for (var y = 0; y < (canvas.height / blockSize); y++) {
+                if (Math.random() < 0.30) {
+                    m[x][y] = 1;
                 }
+            }
         }
         return m;
     }
 
-    function countAliveNeighbours(map, x, y){
+    function countAliveNeighbours(map, x, y) {
         var count = 0;
-        for(var i=-1; i<2; i++){
-            for(var j=-1; j<2; j++){
-                var neighbour_x = x+i;
-                var neighbour_y = y+j;
-                if(neighbour_x < 0 || neighbour_y < 0 || neighbour_x >= map.length || neighbour_y >= map[0].length){
+        for (var i = -1; i < 2; i++) {
+            for (var j = -1; j < 2; j++) {
+                var neighbour_x = x + i;
+                var neighbour_y = y + j;
+                if (neighbour_x < 0 || neighbour_y < 0 || neighbour_x >= map.length || neighbour_y >= map[0].length) {
                     count = count + 1;
-                } else if(map[neighbour_x][neighbour_y]){
+                } else if (map[neighbour_x][neighbour_y]) {
                     count = count + 1;
                 }
             }
@@ -64,23 +65,21 @@
         return count;
     }
 
-    function doSimulationStep(oldMap){
+    function doSimulationStep(oldMap) {
         var newMap = getEmptyMap();
-        for(var x=0; x<oldMap.length; x++){
-            for(var y=0; y<oldMap[0].length; y++){
+        for (var x = 0; x < oldMap.length; x++) {
+            for (var y = 0; y < oldMap[0].length; y++) {
                 var nbs = countAliveNeighbours(oldMap, x, y);
-                if(oldMap[x][y]){
-                    if(nbs < 3){
+                if (oldMap[x][y]) {
+                    if (nbs < 3) {
                         newMap[x][y] = 0;
-                    }
-                    else{
+                    } else {
                         newMap[x][y] = 1;
                     }
-                } else{
-                    if(nbs > 4){
+                } else {
+                    if (nbs > 4) {
                         newMap[x][y] = 1;
-                    }
-                    else{
+                    } else {
                         newMap[x][y] = 0;
                     }
                 }
@@ -89,14 +88,40 @@
         return newMap;
     }
 
-    function generateMap(){
+    function generateMap() {
         var cellmap = getEmptyMap();
         cellmap = initMap(cellmap);
-        for(var i=0; i<2; i++){
+        for (var i = 0; i < 2; i++) {
             cellmap = doSimulationStep(cellmap);
         }
         map = cellmap;
         socket.emit("generateMap", map);
+    }
+
+    function generateArrayForCollitions() {
+        map.forEach(function(row, x) {
+            row.forEach(function(value, y) {
+                if (value) {
+                    var id = x + "-" + y;
+                    var alreadyAdd = mapCollition.filter(function(col) {
+                        return col.id === id;
+                    }).length > 0;
+
+                    if (!alreadyAdd) {
+                        mapCollition.push({
+                            id: id,
+                            value: value,
+                            x: y * blockSize,
+                            y: x * blockSize,
+                            width: blockSize,
+                            height: blockSize
+                        });
+                        //context.fillStyle = "green";
+                        //context.strokeRect(y * blockSize, x * blockSize, blockSize, blockSize);
+                    }
+                }
+            });
+        });
     }
 
     /**
@@ -120,29 +145,33 @@
     function repaint() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         paintMap();
-        usersToPaint.forEach(function (user) {
+        usersToPaint.forEach(function(user) {
             paintUser(user, "blue");
         });
         move();
     }
 
     function paintMap() {
-        map.forEach(function (row, x) {
-            row.forEach(function (value, y) {
-                if (value > 0) {
-                    context.fillStyle = "black";
-                    context.strokeRect(y * blockSize, x * blockSize, blockSize, blockSize);
+        map.forEach(function(row, x) {
+            row.forEach(function(value, y) {
+                if (value) {
+                    //context.fillStyle = "black";
+                    //context.fillText((y * blockSize) + " " + (x * blockSize), y * blockSize, x * blockSize);
+                    //context.strokeRect(y * blockSize, x * blockSize, blockSize, blockSize);
                     context.fillStyle = "red";
                     context.fillRect(
-                        y * blockSize, x * blockSize,
+                        y * blockSize,
+                        x * blockSize,
                         blockSize, blockSize
                     );
-                    mapCollition.push({
-                        x: y * blockSize,
-                        y: x * blockSize,
-                        width: blockSize,
-                        height: blockSize
-                    });
+                } else {
+                    /* context.fillStyle = "black";
+                     context.strokeRect(y * blockSize, x * blockSize, blockSize, blockSize);
+                     context.fillStyle = "white";
+                     context.fillRect(
+                         y * blockSize, x * blockSize,
+                         blockSize, blockSize
+                     );*/
                 }
             });
         });
@@ -158,12 +187,10 @@
 
     function move() {
 
-        var currentUser = usersToPaint.find(function (us) {
+        var currentUser = usersToPaint.find(function(us) {
             return us.socketId === "/#" + socket.id;
         });
         if (currentUser) {
-
-            var speed = 1;
 
             if (MOVEMENT.UP) {
                 if (canIMoveTo(currentUser, KC.UP)) {
@@ -207,22 +234,28 @@
 
         switch (direction) {
             case KC.LEFT:
-                model.x = model.x - 1;
+                model.x = model.x - speed;
                 break;
             case KC.RIGHT:
-                model.x = model.x + 1;
+                model.x = model.x + speed;
                 break;
             case KC.UP:
-                model.y = model.y - 1;
+                model.y = model.y - speed;
                 break;
             case KC.DOWN:
-                model.y = model.y + 1;
+                model.y = model.y + speed;
                 break;
         }
 
+        if (model.x <= 0 || model.x >= (canvas.width - model.width)) {
+            return 0;
+        }
+
+        if (model.y <= 0 || model.y >= (canvas.height - model.height)) {
+            return 0;
+        }
+
         var collition = intersectWithArray(model, mapCollition);
-        console.log(model.x + " " + model.y);
-        console.log(collition);
         return collition === 0;
     }
 
@@ -246,22 +279,23 @@
 
     function bindEvents() {
 
-        btnStart.addEventListener("click", function () {
+        btnStart.addEventListener("click", function() {
             var name = inputName.value;
             socket.emit("connectNewUser", name);
+            //context.scale(2, 2);
         }, false);
 
-        socket.on("start", function (users) {
+        socket.on("start", function(users) {
             usersToPaint = users;
             generateMap();
         });
 
-        socket.on("newUserConnected", function (user) {
+        socket.on("newUserConnected", function(user) {
             usersToPaint.push(user);
         });
 
-        socket.on("updateItem", function (user) {
-            var exist = usersToPaint.find(function (u) {
+        socket.on("updateItem", function(user) {
+            var exist = usersToPaint.find(function(u) {
                 return u.socketId === user.socketId;
             });
             if (exist) {
@@ -271,17 +305,18 @@
             }
         })
 
-        socket.on("updateMap", function (newMap) {
-            map =  newMap;
+        socket.on("updateMap", function(newMap) {
+            map = newMap;
+            generateArrayForCollitions();
         });
 
-        socket.on("disconnect", function (users) {
+        socket.on("disconnect", function(users) {
             usersToPaint = users;
         });
 
 
-        window.addEventListener("keydown", function (evt) {
-            var currentUser = usersToPaint.find(function (us) {
+        window.addEventListener("keydown", function(evt) {
+            var currentUser = usersToPaint.find(function(us) {
                 return us.socketId === "/#" + socket.id;
             });
             if (currentUser) {
@@ -304,8 +339,8 @@
         }, false);
 
 
-        window.addEventListener("keyup", function (evt) {
-            var currentUser = usersToPaint.find(function (us) {
+        window.addEventListener("keyup", function(evt) {
+            var currentUser = usersToPaint.find(function(us) {
                 return us.socketId === "/#" + socket.id;
             });
             if (currentUser) {

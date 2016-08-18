@@ -10,15 +10,16 @@
     <script src="/client.js"></script>
     <style>
         div.game-container {
-            margin: auto;
-            width: 50%;
+            width: 600px;
+            height: 300px;
             border: 3px solid black;
-            padding: 10px;
-            background-color:gray;
+            background-color: gray;
         }
         
         canvas#canvas-game {
-             border: 1px solid black;
+            border: 1px solid black;
+            height: 100%;
+            width: 100%;
         }
     </style>
 </head>
@@ -29,7 +30,7 @@
         <input id="btnStart" type="button" value="Start" />
     </div>
     <div class="game-container">
-        <canvas id="canvas-game" width="720" height="330"></canvas>
+        <canvas id="canvas-game" width="1024" height="800"></canvas>
     </div>
 </body>
 

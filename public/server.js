@@ -45,8 +45,8 @@ Game.prototype.addUser = function(user) {
     }
 }
 
-Game.prototype.addMap = function(map){
-    if(this.map === null){
+Game.prototype.addMap = function(map) {
+    if (this.map === null) {
         this.map = map;
     }
     this.io.emit("updateMap", this.map);
@@ -99,8 +99,8 @@ module.exports = function(socket) {
     game.init({
         io: this,
         socket: socket,
-        width: 720,
-        height: 330
+        width: 1024,
+        height: 800
     });
 
     console.log(game.users);
@@ -108,11 +108,11 @@ module.exports = function(socket) {
     socket.emit("start", game.users);
 
     socket.on("connectNewUser", function(name) {
-        console.log('connected ' +name);
+        console.log('connected ' + name);
         game.addUser(new User(name, socket.id));
     });
 
-    socket.on("generateMap",function(map){
+    socket.on("generateMap", function(map) {
         game.addMap(map);
     });
 
