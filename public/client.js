@@ -40,7 +40,7 @@
     function initMap(m) {
         for (var x = 0; x < 11; x++) {
                 for (var y = 0; y < 24; y++) {
-                    if(Math.random() < 0.30){
+                    if(Math.random() < 0.20){
                         m[x][y] = 1;
                     }
                 }
@@ -123,6 +123,7 @@
         usersToPaint.forEach(function (user) {
             paintUser(user, "blue");
         });
+        move();
     }
 
     function paintMap() {
@@ -153,7 +154,6 @@
         context.strokeRect(user.x, user.y, userSize, userSize);
         context.fillStyle = color;
         context.fillRect(user.x, user.y, userSize, userSize);
-        move();
     }
 
     function move() {
@@ -163,30 +163,32 @@
         });
         if (currentUser) {
 
+            var speed = 1;
+
             if (MOVEMENT.UP) {
                 if (canIMoveTo(currentUser, KC.UP)) {
-                    currentUser.y -= 1;
+                    currentUser.y -= speed;
                 }
 
             }
 
             if (MOVEMENT.DOWN) {
                 if (canIMoveTo(currentUser, KC.DOWN)) {
-                    currentUser.y += 1;
+                    currentUser.y += speed;
                 }
 
             }
 
             if (MOVEMENT.RIGHT) {
                 if (canIMoveTo(currentUser, KC.RIGHT)) {
-                    currentUser.x += 1;
+                    currentUser.x += speed;
                 }
 
             }
 
             if (MOVEMENT.LEFT) {
                 if (canIMoveTo(currentUser, KC.LEFT)) {
-                    currentUser.x -= 1;
+                    currentUser.x -= speed;
                 }
 
             }
