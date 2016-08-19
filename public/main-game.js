@@ -18,8 +18,8 @@ window.addEventListener("load", function () {
 
     function createPlayer(item) {
         var player = new Game.Player({
-            socketId : item.socketId,
-            item : item,
+            socketId: item.socketId,
+            item: item,
             world: world,
             map: map
         });
@@ -38,18 +38,18 @@ window.addEventListener("load", function () {
     function update() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         var thisSocket = "/#" + socket.id;
-            
-            players.forEach(function (item) {
-                if (item.socketId === thisSocket) {
-                    item.player.update(socket);
-                    map.draw(context, item.camera.xView, item.camera.yView);
-                    item.camera.update();
-                    item.player.draw(context, item.camera.xView, item.camera.yView);
-                } else {
-                    map.addOponentToMap(item.player);
-                }
-            });
-        
+
+        players.forEach(function (item) {
+            if (item.socketId === thisSocket) {
+                item.player.update(socket);
+                map.draw(context, item.camera.xView, item.camera.yView);
+                item.camera.update();
+                item.player.draw(context, item.camera.xView, item.camera.yView);
+            } else {
+                map.addOponentToMap(item.player);
+            }
+        });
+
 
         requestAnimationFrame(update);
     }
@@ -86,7 +86,7 @@ window.addEventListener("load", function () {
 
     function bindSocketEvents() {
         socket.on("start", function (playerList) {
-            players = playerList.map(function(item){
+            players = playerList.map(function (item) {
                 return createPlayer(item);
             });
             map.generate(socket);
@@ -98,7 +98,10 @@ window.addEventListener("load", function () {
         });
 
         socket.on("updateItem", function (player) {
-            var exist = players.find(function(item) {
+            if(player.socketId === "/#" + socket.id){
+                return;
+            }
+            var exist = players.find(function (item) {
                 return item.socketId === player.socketId;
             });
             if (exist) {
@@ -113,7 +116,7 @@ window.addEventListener("load", function () {
         });
 
         socket.on("disconnect", function (p) {
-            players = p.players.map(function(item){
+            players = p.players.map(function (item) {
                 return createPlayer(item);
             });
             map.removeOponent(p.itemRemoved);
