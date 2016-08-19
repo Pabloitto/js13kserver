@@ -1,5 +1,5 @@
 (function () {
-    
+
     var AXIS = {
         NONE: "none",
         HORIZONTAL: "horizontal",
@@ -18,7 +18,6 @@
         this.followed = null;
         this.viewportRect = new Game.Rectangle(this.xView, this.yView, this.wView, this.hView);
         this.worldRect = new Game.Rectangle(0, 0, worldWidth, worldHeight);
-
     }
 
     Camera.prototype.follow = function (gameObject, xDeadZone, yDeadZone) {

@@ -23,16 +23,8 @@
             }
             return contextInstance;
         },
-        width: 2000,
-        height: 1000,
-        initialPlayerPosition: {
-            getX: function () {
-                return 50;
-            },
-            getY: function () {
-                return 50;
-            }
-        },
+        width: GAME_WIDTH,
+        height: GAME_HEIGHT,
         KEY_CONTROLS: {
             UP: 38,
             DOWN: 40,

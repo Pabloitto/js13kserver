@@ -1,12 +1,5 @@
 "use strict";
 
-var KC = {
-    UP: 38,
-    DOWN: 40,
-    LEFT: 37,
-    RIGHT: 39
-};
-
 function Game() {
     this.started = false;
     this.users = [];
@@ -104,8 +97,8 @@ module.exports = function(socket) {
     game.init({
         io: this,
         socket: socket,
-        width: 1024,
-        height: 800
+        width: GAME_WIDTH,
+        height: GAME_HEIGHT
     });
 
     console.log(game.users);

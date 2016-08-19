@@ -11,8 +11,8 @@
         worldHeight = world.height;
         this.socketId = p.socketId;
         this.name = p.item.name;
-        this.x = p.item.x || world.initialPlayerPosition.getX();
-        this.y = p.item.y || world.initialPlayerPosition.getY();
+        this.x = p.item.x || 0;
+        this.y = p.item.y || 0;
         this.speed = 2;
         this.width = 10;
         this.height = 10;
