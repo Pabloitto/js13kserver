@@ -1,0 +1,53 @@
+(function () {
+
+    if (!window.Game) {
+        window.Game = {};
+    }
+
+    var canvasName = "canvas-game";
+    var canvasInstance = null;
+    var contextInstance = null;
+
+    function World() { }
+
+    World.prototype = {
+        getCanvasInstance: function () {
+            if (canvasInstance === null) {
+                canvasInstance = document.getElementById(canvasName);
+            }
+            return canvasInstance;
+        },
+        getCanvasContext: function () {
+            if (contextInstance === null) {
+                contextInstance = this.getCanvasInstance().getContext("2d");
+            }
+            return contextInstance;
+        },
+        width: 2000,
+        height: 1000,
+        initialPlayerPosition: {
+            getX: function () {
+                return 50;
+            },
+            getY: function () {
+                return 50;
+            }
+        },
+        KEY_CONTROLS: {
+            UP: 38,
+            DOWN: 40,
+            LEFT: 37,
+            RIGHT: 39
+        },
+        CONTROLS: {
+            left: 0,
+            up: 0,
+            right: 0,
+            down: 0,
+        }
+    };
+
+
+    Game.World = World;
+
+})();

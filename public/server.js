@@ -53,6 +53,7 @@ Game.prototype.addMap = function(map) {
 }
 
 Game.prototype.updatePosition = function(user) {
+    //console.log(user);
     var exist = this.users.find(function(u) {
         return u.socketId === user.socketId;
     });
@@ -60,6 +61,7 @@ Game.prototype.updatePosition = function(user) {
     if (exist) {
         exist.x = user.x;
         exist.y = user.y;
+        //console.log("Updating positions");
         this.io.emit("updateItem", exist);
     }
 }
@@ -71,7 +73,10 @@ Game.prototype.removeUser = function(socketId) {
         return u.socketId !== socketId;
     });
     console.log("Removing", this.users);
-    this.io.emit("disconnect", this.users);
+    this.io.emit("disconnect", {
+        itemRemoved : socketId,
+        players : this.users
+    });
 }
 
 Game.prototype.getRandomPosition = function() {
