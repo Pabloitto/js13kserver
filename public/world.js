@@ -1,4 +1,4 @@
-(function () {
+(function() {
 
     if (!window.Game) {
         window.Game = {};
@@ -8,16 +8,16 @@
     var canvasInstance = null;
     var contextInstance = null;
 
-    function World() { }
+    function World() {}
 
     World.prototype = {
-        getCanvasInstance: function () {
+        getCanvasInstance: function() {
             if (canvasInstance === null) {
                 canvasInstance = document.getElementById(canvasName);
             }
             return canvasInstance;
         },
-        getCanvasContext: function () {
+        getCanvasContext: function() {
             if (contextInstance === null) {
                 contextInstance = this.getCanvasInstance().getContext("2d");
             }
@@ -26,10 +26,10 @@
         width: GAME_WIDTH,
         height: GAME_HEIGHT,
         KEY_CONTROLS: {
-            UP: 38,
-            DOWN: 40,
-            LEFT: 37,
-            RIGHT: 39
+            UP: [38, 87],
+            DOWN: [40, 83],
+            LEFT: [37, 65],
+            RIGHT: [39, 68]
         },
         CONTROLS: {
             left: 0,

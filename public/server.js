@@ -54,7 +54,17 @@ Game.prototype.updatePosition = function(user) {
     if (exist) {
         exist.x = user.x;
         exist.y = user.y;
-        //console.log("Updating positions");
+        this.io.emit("updateItem", exist);
+    }
+}
+
+Game.prototype.updateAngle = function(user) {
+    var exist = this.users.find(function(u) {
+        return u.socketId === user.socketId;
+    });
+
+    if (exist) {
+        exist.angle = user.angle;
         this.io.emit("updateItem", exist);
     }
 }
@@ -67,8 +77,8 @@ Game.prototype.removeUser = function(socketId) {
     });
     console.log("Removing", this.users);
     this.io.emit("disconnect", {
-        itemRemoved : socketId,
-        players : this.users
+        itemRemoved: socketId,
+        players: this.users
     });
 }
 
@@ -86,6 +96,7 @@ function User(name, id) {
     this.socketId = id;
     this.x = 0;
     this.y = 0;
+    this.angle = 0;
 }
 
 /**
@@ -116,6 +127,10 @@ module.exports = function(socket) {
 
     socket.on("userChangePosition", function(user) {
         game.updatePosition(user);
+    });
+
+    socket.on("updateAngle", function(user) {
+        game.updateAngle(user);
     });
 
     socket.on("disconnect", function() {

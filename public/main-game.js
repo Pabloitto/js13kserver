@@ -1,4 +1,4 @@
-window.addEventListener("load", function () {
+window.addEventListener("load", function() {
 
     var socket = io({ upgrade: false, transports: ["websocket"] });
 
@@ -15,6 +15,10 @@ window.addEventListener("load", function () {
     var canvas = world.getCanvasInstance();
 
     var context = world.getCanvasContext();
+
+    var mouseEventListener = null;
+
+    var started = false;
 
     function createPlayer(item) {
         var player = new Game.Player({
@@ -39,7 +43,7 @@ window.addEventListener("load", function () {
         context.clearRect(0, 0, canvas.width, canvas.height);
         var thisSocket = "/#" + socket.id;
 
-        players.forEach(function (item) {
+        players.forEach(function(item) {
             if (item.socketId === thisSocket) {
                 item.player.update(socket);
                 map.draw(context, item.camera.xView, item.camera.yView);
@@ -55,68 +59,108 @@ window.addEventListener("load", function () {
     }
 
     function play() {
-        update();
-        socket.emit("connectNewUser", inputName.value);
+        if (started === false) {
+            update();
+            socket.emit("connectNewUser", inputName.value);
+            started = true;
+        }
     }
 
     function attachKeyEvent(eventName, finalValue) {
-        window.addEventListener(eventName, function (e) {
-            switch (e.keyCode) {
-                case world.KEY_CONTROLS.LEFT:
-                    world.CONTROLS.left = finalValue;
-                    break;
-                case world.KEY_CONTROLS.UP:
-                    world.CONTROLS.up = finalValue;
-                    break;
-                case world.KEY_CONTROLS.RIGHT:
-                    world.CONTROLS.right = finalValue;
-                    break;
-                case world.KEY_CONTROLS.DOWN:
-                    world.CONTROLS.down = finalValue;
-                    break;
+        window.addEventListener(eventName, function(e) {
+            var keys = [];
+            for (var p in world.KEY_CONTROLS) {
+                keys = world.KEY_CONTROLS[p];
+                if (keys.indexOf(e.keyCode) > -1) {
+                    switch (p) {
+                        case "LEFT":
+                            world.CONTROLS.left = finalValue;
+                            break;
+                        case "UP":
+                            world.CONTROLS.up = finalValue;
+                            break;
+                        case "RIGHT":
+                            world.CONTROLS.right = finalValue;
+                            break;
+                        case "DOWN":
+                            world.CONTROLS.down = finalValue;
+                            break;
+                    }
+                }
             }
         }, false);
+    }
+
+    function onMouseMove(x, y) {
+        var thisSocket = "/#" + socket.id;
+        var playerContainer = players.find(function(item) {
+            return item.socketId === thisSocket;
+        });
+
+        if (!playerContainer) {
+            return;
+        }
+
+        var currentPlayer = playerContainer.player;
+
+        if (!currentPlayer) {
+            return;
+        }
+        currentPlayer.angle = currentPlayer.calculateAngle(x, y);
+
+        socket.emit("updateAngle", currentPlayer);
+        //console.log(x + " " + y + "Angle = " + currentPlayer.angle);
+    }
+
+    function onMouseClick(x, y, button) {
+
     }
 
     function bindDOMEvents() {
         attachKeyEvent("keydown", 1);
         attachKeyEvent("keyup", 0);
         btnStart.addEventListener("click", play, false);
+        mouseEventListener = new Game.MouseEventListener({
+            element: canvas,
+            onMouseMove: onMouseMove,
+            onClick: onMouseClick
+        });
     }
 
     function bindSocketEvents() {
-        socket.on("start", function (playerList) {
-            players = playerList.map(function (item) {
+        socket.on("start", function(playerList) {
+            players = playerList.map(function(item) {
                 return createPlayer(item);
             });
             map.generate(socket);
         });
 
-        socket.on("newUserConnected", function (user) {
+        socket.on("newUserConnected", function(user) {
             var player = createPlayer(user);
             players.push(player);
         });
 
-        socket.on("updateItem", function (player) {
-            if(player.socketId === "/#" + socket.id){
+        socket.on("updateItem", function(player) {
+            if (player.socketId === "/#" + socket.id) {
                 return;
             }
-            var exist = players.find(function (item) {
+            var exist = players.find(function(item) {
                 return item.socketId === player.socketId;
             });
             if (exist) {
                 exist.player.name = player.name;
                 exist.player.x = player.x;
                 exist.player.y = player.y;
+                exist.player.angle = player.angle;
             }
         })
 
-        socket.on("updateMap", function (newMap) {
+        socket.on("updateMap", function(newMap) {
             map.updateMap(newMap);
         });
 
-        socket.on("disconnect", function (p) {
-            players = p.players.map(function (item) {
+        socket.on("disconnect", function(p) {
+            players = p.players.map(function(item) {
                 return createPlayer(item);
             });
             map.removeOponent(p.itemRemoved);

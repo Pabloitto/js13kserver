@@ -1,4 +1,4 @@
-(function () {
+(function() {
 
     var canvas = null;
     var context = null;
@@ -15,16 +15,17 @@
         this.width = pWorld.width;
         this.height = pWorld.height;
         this.image = null;
+        Game.ImageFactory.loadImage("block");
     }
 
-    Map.prototype.updateMap = function (newMap) {
+    Map.prototype.updateMap = function(newMap) {
         map = newMap;
         generateArrayForCollitions();
         this.createMapImage();
     }
 
-    Map.prototype.addOponentToMap = function (oponent) {
-        var exist = oponents.filter(function (item) {
+    Map.prototype.addOponentToMap = function(oponent) {
+        var exist = oponents.filter(function(item) {
             return item.socketId === oponent.socketId;
         }).length > 0;
 
@@ -33,13 +34,13 @@
         }
     }
 
-    Map.prototype.removeOponent = function(socketId){
-        oponents = oponents.filter(function (item) {
+    Map.prototype.removeOponent = function(socketId) {
+        oponents = oponents.filter(function(item) {
             return item.socketId !== socketId;
         });
     }
 
-    Map.prototype.generate = function (socket) {
+    Map.prototype.generate = function(socket) {
 
         generateMap();
         generateArrayForCollitions();
@@ -51,7 +52,8 @@
         }
     }
 
-    Map.prototype.createMapImage = function () {
+    Map.prototype.createMapImage = function() {
+        var blockImg = Game.ImageFactory.getImage("block");
         var ctx = document.createElement("canvas").getContext("2d");
         ctx.canvas.width = this.width;
         ctx.canvas.height = this.height;
@@ -62,14 +64,10 @@
         var color = "red";
         ctx.save();
         ctx.fillStyle = color;
-        map.forEach(function (row, x) {
-            ctx.beginPath();
-            row.forEach(function (value, y) {
+        map.forEach(function(row, x) {
+            row.forEach(function(value, y) {
                 if (value) {
-                    ctx.rect(y * blockSize,
-                        x * blockSize, blockSize, blockSize);
-                    ctx.fill();
-                    ctx.closePath();
+                    ctx.drawImage(blockImg, y * blockSize, x * blockSize, blockSize, blockSize);
                 }
             });
         });
@@ -82,7 +80,7 @@
         ctx = null;
     }
 
-    Map.prototype.draw = function (context, xView, yView) {
+    Map.prototype.draw = function(context, xView, yView) {
         var sx, sy, dx, dy;
         var sWidth, sHeight, dWidth, dHeight;
 
@@ -104,13 +102,13 @@
         dWidth = sWidth;
         dHeight = sHeight;
         context.drawImage(this.image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-        
-        oponents.forEach(function (item) {
+
+        oponents.forEach(function(item) {
             item.draw(context, sx, sy);
         });
     }
 
-    Map.prototype.canIMoveTo = function (player, direction) {
+    Map.prototype.canIMoveTo = function(player, direction) {
 
         var model = {
             x: player.x,
@@ -212,11 +210,11 @@
 
     function generateArrayForCollitions() {
         mapCollition = [];
-        map.forEach(function (row, x) {
-            row.forEach(function (value, y) {
+        map.forEach(function(row, x) {
+            row.forEach(function(value, y) {
                 if (value) {
                     var id = x + "-" + y;
-                    var alreadyAdd = mapCollition.filter(function (col) {
+                    var alreadyAdd = mapCollition.filter(function(col) {
                         return col.id === id;
                     }).length > 0;
 
