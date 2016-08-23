@@ -5,7 +5,7 @@
     var map = null;
     var world = null;
     var mapCollition = [];
-    var blockSize = 30;
+    var blockSize = BLOCK_SIZE;
     var oponents = [];
 
     function Map(pWorld) {

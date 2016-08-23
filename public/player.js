@@ -76,7 +76,8 @@
         this.yView = pyView || 0;
         context.save();
         context.fillStyle = "white";
-        context.fillText((~~this.x) + " " + (~~this.y), this.x - this.xView, this.y - this.height - this.yView);
+        //context.fillText((~~this.x) + " " + (~~this.y), this.x - this.xView, this.y - this.height - this.yView);
+        context.fillText(this.name,  this.x - this.xView, this.y - this.height - this.yView);
         if (playerImg === null) {
             playerImg = Game.ImageFactory.getImage("player");
         }
@@ -89,8 +90,6 @@
             this.height, -(this.width / 2), -(this.height / 2),
             this.width,
             this.height);
-        //context.fillStyle = "white";
-        //context.fillText(this.name, this.x + (this.height / 2) - xView, this.y + (this.height * 2) - yView);
         context.restore();
     }
 

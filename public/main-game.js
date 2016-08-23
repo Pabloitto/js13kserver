@@ -8,6 +8,8 @@ window.addEventListener("load", function() {
 
     var inputName = document.getElementById("inputName");
 
+    var playerListDOM = document.getElementById("player-list");
+
     var world = new Game.World();
 
     var map = new Game.Map(world);
@@ -60,9 +62,14 @@ window.addEventListener("load", function() {
 
     function play() {
         if (started === false) {
-            update();
-            socket.emit("connectNewUser", inputName.value);
-            started = true;
+            inputName.value = inputName.value.replace(/^\s+|\s+$/gm,'');
+            if(inputName.value){
+                update();
+                socket.emit("connectNewUser", inputName.value);
+                started = true;
+            }else{
+                alert("Your name is required!");
+            }
         }
     }
 
@@ -91,7 +98,7 @@ window.addEventListener("load", function() {
         }, false);
     }
 
-    function onMouseMove(x, y) {
+    function getCurrentPlayer(){
         var thisSocket = "/#" + socket.id;
         var playerContainer = players.find(function(item) {
             return item.socketId === thisSocket;
@@ -101,11 +108,16 @@ window.addEventListener("load", function() {
             return;
         }
 
-        var currentPlayer = playerContainer.player;
+        return playerContainer.player;
+    }
+
+    function onMouseMove(x, y) {
+        var currentPlayer = getCurrentPlayer();
 
         if (!currentPlayer) {
             return;
         }
+
         currentPlayer.angle = currentPlayer.calculateAngle(x, y);
 
         socket.emit("updateAngle", currentPlayer);
@@ -132,12 +144,14 @@ window.addEventListener("load", function() {
             players = playerList.map(function(item) {
                 return createPlayer(item);
             });
+            renderPlayerDOMList();
             map.generate(socket);
         });
 
         socket.on("newUserConnected", function(user) {
             var player = createPlayer(user);
             players.push(player);
+            renderPlayerDOMList();
         });
 
         socket.on("updateItem", function(player) {
@@ -170,6 +184,12 @@ window.addEventListener("load", function() {
     function bindEvents() {
         bindDOMEvents();
         bindSocketEvents();
+    }
+
+    function renderPlayerDOMList(){
+        playerListDOM.innerHTML = players.map(function(item){
+            return "<li>"+item.player.name+"</li>";
+        }).join("");
     }
 
     bindEvents();

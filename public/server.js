@@ -30,12 +30,28 @@ Game.prototype.addUser = function(user) {
         this.io.emit("updateItem", exist);
     } else {
         console.log('connecting new user ' + user.socketId);
-        var pos = this.getRandomPosition();
+        var pos = this.getFreePositionInMap();
         user.x = pos.x;
         user.y = pos.y;
         this.users.push(user);
         this.io.emit("newUserConnected", user);
     }
+}
+
+Game.prototype.getFreePositionInMap = function(){
+       var pos = this.getRandomPosition();
+
+        var mX = Math.floor(pos.x / BLOCK_SIZE);
+        var mY = Math.floor(pos.y / BLOCK_SIZE);
+        
+        console.log(mX+" "+mY);
+        console.log(this.map[mX][mY]);
+
+        if(this.map[mX][mY] === 1){
+            return this.getFreePositionInMap();
+        }
+
+        return pos;
 }
 
 Game.prototype.addMap = function(map) {
