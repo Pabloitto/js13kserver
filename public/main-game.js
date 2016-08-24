@@ -178,6 +178,7 @@ window.addEventListener("load", function() {
                 return createPlayer(item);
             });
             map.removeOponent(p.itemRemoved);
+            renderPlayerDOMList();
         });
     }
 
