@@ -21,22 +21,13 @@ Game.prototype.init = function(config) {
 }
 
 Game.prototype.addUser = function(user) {
-    var exist = this.users.find(function(u) {
-        return u.socketId === user.socketId;
-    });
-    if (exist) {
-        exist.name = user.name;
-        console.log('updating user to ' + exist.name);
-        this.io.emit("updateItem", exist);
-    } else {
-        console.log('connecting new user ' + user.socketId);
-        console.log("--------------------");
-        var pos = this.getFreePositionInMap();
-        user.x = pos.x;
-        user.y = pos.y;
-        this.users.push(user);
-        this.io.emit("newUserConnected", user);
-    }
+    console.log('connecting new user ' + user.socketId);
+    console.log("--------------------");
+    var pos = this.getFreePositionInMap();
+    user.x = pos.x;
+    user.y = pos.y;
+    this.users.push(user);
+    this.io.emit("newUserConnected", user);
 }
 
 Game.prototype.getFreePositionInMap = function() {
@@ -152,6 +143,7 @@ Game.prototype.collition = function(p) {
     this.io.emit("handleCollition", {
         data: {
             socketId: p.fromPlayer,
+            toPlayer: p.toPlayer,
             bulletId: p.bulletId
         }
     });
@@ -227,6 +219,10 @@ module.exports = function(socket) {
 
     socket.on("collition", function(p) {
         game.collition(p);
+    });
+
+    socket.on("userDead", function(id) {
+        game.removeUser(id);
     });
 
     socket.on("disconnect", function() {

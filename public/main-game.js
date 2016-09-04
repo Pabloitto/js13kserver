@@ -51,6 +51,9 @@ window.addEventListener("load", function() {
                 map.draw(context, item.camera.xView, item.camera.yView);
                 var collition = map.detectCollition(item.player);
                 if (collition) {
+                    if (collition.with === "oponent") {
+                        collition.e.hurt();
+                    }
                     socket.emit("collition", {
                         fromPlayer: thisSocket,
                         toPlayer: collition.e.socketId,
@@ -70,19 +73,21 @@ window.addEventListener("load", function() {
     }
 
     function play() {
+        inputName.value = inputName.value.replace(/^\s+|\s+$/gm, '');
+        if (!inputName.value) {
+            alert("Your name is required!");
+            return;
+        }
+
+        if (alreadyThere(inputName.value)) {
+            alert("That name is already used in the room!");
+            return;
+        }
+
         if (started === false) {
-            inputName.value = inputName.value.replace(/^\s+|\s+$/gm, '');
-            if (inputName.value) {
-                if (!alreadyThere(inputName.value)) {
-                    update();
-                    socket.emit("connectNewUser", inputName.value);
-                    started = true;
-                } else {
-                    alert("That name is already used in the room!");
-                }
-            } else {
-                alert("Your name is required!");
-            }
+            update();
+            socket.emit("connectNewUser", inputName.value);
+            started = true;
         }
     }
 
@@ -226,8 +231,17 @@ window.addEventListener("load", function() {
             if (p.data.socketId === "/#" + socket.id) {
                 return;
             }
+
+            var exist = players.find(function(item) {
+                return item.socketId === p.data.toPlayer;
+            });
+
+            if (exist) {
+                exist.player.hurt();
+            }
+
             map.removeEnemyBullet(p.data.socketId, p.data.bulletId);
-        })
+        });
 
         socket.on("disconnect", function(p) {
             players = p.players.map(function(item) {

@@ -23,6 +23,8 @@
         this.xView = 0;
         this.yView = 0;
         this.bullets = [];
+        this.health = 5;
+        this.energyBar = new Game.EnergyBar(this);
         Game.ImageFactory.loadImage("player");
     }
 
@@ -119,6 +121,16 @@
             context.strokeRect(-(this.width / 2), -(this.height / 2), this.width, this.height);
         }
         context.restore();
+        this.energyBar = new Game.EnergyBar(this);
+        this.energyBar.draw(context, this.health, this.xView, this.yView);
+        this.energyBar.move(this);
+    }
+
+    Player.prototype.hurt = function() {
+        if (this.health < 0.1) {
+            return true;
+        }
+        this.health -= 0.1;
     }
 
     Player.prototype.drawBullets = function(context, sX, sY) {

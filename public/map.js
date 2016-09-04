@@ -166,12 +166,25 @@
         for (var i = 0; i < currentPlayer.bullets.length; i++) {
             var bullet = currentPlayer.bullets[i];
             var collition = intersectWithArray(bullet, oponents);
+
             if (collition) {
                 collition.bulletId = bullet.bulletId;
+                collition.with = "oponent";
                 currentPlayer.bullets.splice(i, 1);
                 break;
             }
+
+            collition = intersectWithArray(bullet, mapCollition);
+
+            if (collition) {
+                collition.bulletId = bullet.bulletId;
+                collition.with = "wall";
+                currentPlayer.bullets.splice(i, 1);
+                break;
+            }
+
         }
+
         return collition;
     }
 
