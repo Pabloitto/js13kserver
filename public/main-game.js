@@ -49,27 +49,48 @@ window.addEventListener("load", function() {
             if (item.socketId === thisSocket) {
                 item.player.update(socket);
                 map.draw(context, item.camera.xView, item.camera.yView);
+                var collition = map.detectCollition(item.player);
+                if (collition) {
+                    socket.emit("collition", {
+                        fromPlayer: thisSocket,
+                        toPlayer: collition.e.socketId,
+                        bulletId: collition.bulletId
+                    });
+                }
                 item.camera.update();
                 item.player.draw(context, item.camera.xView, item.camera.yView);
+                item.player.drawBullets(context, item.camera.xView, item.camera.yView);
+                item.player.clearBullets(world);
             } else {
                 map.addOponentToMap(item.player);
             }
         });
-
 
         requestAnimationFrame(update);
     }
 
     function play() {
         if (started === false) {
-            inputName.value = inputName.value.replace(/^\s+|\s+$/gm,'');
-            if(inputName.value){
-                update();
-                socket.emit("connectNewUser", inputName.value);
-                started = true;
-            }else{
+            inputName.value = inputName.value.replace(/^\s+|\s+$/gm, '');
+            if (inputName.value) {
+                if (!alreadyThere(inputName.value)) {
+                    update();
+                    socket.emit("connectNewUser", inputName.value);
+                    started = true;
+                } else {
+                    alert("That name is already used in the room!");
+                }
+            } else {
                 alert("Your name is required!");
             }
+        }
+    }
+
+    function alreadyThere(name) {
+        if (players && players.length) {
+            return players.filter(function(item) {
+                return item.player.name === name;
+            }).length > 0;
         }
     }
 
@@ -98,7 +119,7 @@ window.addEventListener("load", function() {
         }, false);
     }
 
-    function getCurrentPlayer(){
+    function getCurrentPlayer() {
         var thisSocket = "/#" + socket.id;
         var playerContainer = players.find(function(item) {
             return item.socketId === thisSocket;
@@ -125,7 +146,26 @@ window.addEventListener("load", function() {
     }
 
     function onMouseClick(x, y, button) {
+        var currentPlayer = getCurrentPlayer();
 
+        if (!currentPlayer) {
+            return;
+        }
+        var relX = (x + currentPlayer.xView);
+        var relY = (y + currentPlayer.yView);
+
+        //console.log("x: " + x + " y: " + y);
+        var bulletId = currentPlayer.shot({ x: relX, y: relY });
+        socket.emit("shot", {
+            data: {
+                player: currentPlayer,
+                bulletId: bulletId,
+                vector: {
+                    origin: { x: currentPlayer.x + (currentPlayer.width / 2), y: currentPlayer.y + (currentPlayer.height / 2) },
+                    target: { x: relX, y: relY }
+                }
+            }
+        });
     }
 
     function bindDOMEvents() {
@@ -173,6 +213,22 @@ window.addEventListener("load", function() {
             map.updateMap(newMap);
         });
 
+        socket.on("updateShot", function(p) {
+            if (p.data.player.socketId === "/#" + socket.id) {
+                return;
+            }
+            var bullet = new Game.Bullet(p.data.vector);
+            bullet.bulletId = p.data.bulletId;
+            map.addEnemyBullet(p.data.player.socketId, bullet);
+        });
+
+        socket.on("handleCollition", function(p) {
+            if (p.data.socketId === "/#" + socket.id) {
+                return;
+            }
+            map.removeEnemyBullet(p.data.socketId, p.data.bulletId);
+        })
+
         socket.on("disconnect", function(p) {
             players = p.players.map(function(item) {
                 return createPlayer(item);
@@ -187,9 +243,9 @@ window.addEventListener("load", function() {
         bindSocketEvents();
     }
 
-    function renderPlayerDOMList(){
-        playerListDOM.innerHTML = players.map(function(item){
-            return "<li>"+item.player.name+"</li>";
+    function renderPlayerDOMList() {
+        playerListDOM.innerHTML = players.map(function(item) {
+            return "<li>" + item.player.name + "</li>";
         }).join("");
     }
 

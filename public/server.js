@@ -30,6 +30,7 @@ Game.prototype.addUser = function(user) {
         this.io.emit("updateItem", exist);
     } else {
         console.log('connecting new user ' + user.socketId);
+        console.log("--------------------");
         var pos = this.getFreePositionInMap();
         user.x = pos.x;
         user.y = pos.y;
@@ -38,20 +39,77 @@ Game.prototype.addUser = function(user) {
     }
 }
 
-Game.prototype.getFreePositionInMap = function(){
-       var pos = this.getRandomPosition();
+Game.prototype.getFreePositionInMap = function() {
+    var pos = this.getRandomPosition();
 
-        var mX = Math.floor(pos.x / BLOCK_SIZE);
-        var mY = Math.floor(pos.y / BLOCK_SIZE);
-        
-        console.log(mX+" "+mY);
-        console.log(this.map[mX][mY]);
+    var mY = Math.floor(pos.x / BLOCK_SIZE);
+    var mX = Math.floor(pos.y / BLOCK_SIZE);
 
-        if(this.map[mX][mY] === 1){
-            return this.getFreePositionInMap();
-        }
 
-        return pos;
+
+    console.log(mX + " " + mY);
+    console.log(this.map[mX][mY]);
+
+    if (this.map[mX][mY] === 1) {
+        return this.getFreePositionInMap();
+    }
+
+    console.log(mX + " " + (mY + 1));
+    console.log(this.map[mX][mY + 1]);
+    if (this.map[mX][mY + 1] === 1) {
+        return this.getFreePositionInMap();
+    }
+
+    console.log(mX + " " + (mY - 1));
+    console.log(this.map[mX][mY - 1]);
+
+    if (this.map[mX][mY - 1] === 1) {
+        return this.getFreePositionInMap();
+    }
+
+    console.log((mX + 1) + " " + mY);
+    console.log(this.map[mX + 1][mY]);
+
+    if (this.map[mX + 1][mY] === 1) {
+        return this.getFreePositionInMap();
+    }
+
+    console.log((mX - 1) + " " + mY);
+    console.log(this.map[mX - 1][mY]);
+
+    if (this.map[mX - 1][mY] === 1) {
+        return this.getFreePositionInMap();
+    }
+
+    console.log((mX - 1) + " " + mY - 1);
+    console.log(this.map[mX - 1][mY - 1]);
+
+    if (this.map[mX - 1][mY - 1] === 1) {
+        return this.getFreePositionInMap();
+    }
+
+    console.log((mX + 1) + " " + mY + 1);
+    console.log(this.map[mX + 1][mY + 1]);
+
+    if (this.map[mX + 1][mY + 1] === 1) {
+        return this.getFreePositionInMap();
+    }
+
+    console.log((mX + 1) + " " + mY - 1);
+    console.log(this.map[mX + 1][mY - 1]);
+
+    if (this.map[mX + 1][mY - 1] === 1) {
+        return this.getFreePositionInMap();
+    }
+
+    console.log((mX - 1) + " " + mY + 1);
+    console.log(this.map[mX - 1][mY + 1]);
+
+    if (this.map[mX - 1][mY + 1] === 1) {
+        return this.getFreePositionInMap();
+    }
+
+    return pos;
 }
 
 Game.prototype.addMap = function(map) {
@@ -83,6 +141,20 @@ Game.prototype.updateAngle = function(user) {
         exist.angle = user.angle;
         this.io.emit("updateItem", exist);
     }
+}
+
+Game.prototype.shot = function(p) {
+    this.io.emit("updateShot", p);
+}
+
+Game.prototype.collition = function(p) {
+    console.log(p);
+    this.io.emit("handleCollition", {
+        data: {
+            socketId: p.fromPlayer,
+            bulletId: p.bulletId
+        }
+    });
 }
 
 Game.prototype.removeUser = function(socketId) {
@@ -147,6 +219,14 @@ module.exports = function(socket) {
 
     socket.on("updateAngle", function(user) {
         game.updateAngle(user);
+    });
+
+    socket.on("shot", function(p) {
+        game.shot(p);
+    });
+
+    socket.on("collition", function(p) {
+        game.collition(p);
     });
 
     socket.on("disconnect", function() {

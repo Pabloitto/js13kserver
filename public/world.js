@@ -1,7 +1,30 @@
 (function() {
 
     if (!window.Game) {
-        window.Game = {};
+        window.Game = {
+            calculateAngle: function(xTarget, yTarget, xOrigin, yOrigin) {
+                return Math.atan2(yTarget - yOrigin, xTarget - xOrigin) * 180 / Math.PI;
+            },
+            calculateDirection: function(vectors, objectContext) {
+                var angle = this.calculateAngle(vectors.target.x, vectors.target.y, objectContext.x, objectContext.y),
+                    radians = angle * Math.PI / 180;
+                objectContext.vx = Math.cos(radians) * objectContext.speed;
+                objectContext.vy = Math.sin(radians) * objectContext.speed;
+            },
+            guid: function() {
+                var result = '',
+                    i, j;
+                for (j = 0; j < 32; j++) {
+                    if (j == 8 || j == 12 || j == 16 || j == 20) {
+                        result = result + '-';
+                    }
+                    i = Math.floor(Math.random() * 16).toString(16).toUpperCase();
+                    result = result + i;
+                }
+                return result;
+            },
+            DEBUG: false
+        };
     }
 
     var canvasName = "canvas-game";

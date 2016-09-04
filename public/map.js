@@ -18,6 +18,26 @@
         Game.ImageFactory.loadImage("block");
     }
 
+    Map.prototype.addEnemyBullet = function(oponentId, bullet) {
+        var exist = oponents.find(function(item) {
+            return item.socketId === oponentId;
+        });
+        if (exist) {
+            exist.bullets.push(bullet);
+        }
+    }
+
+    Map.prototype.removeEnemyBullet = function(oponentId, bulletId) {
+        var exist = oponents.find(function(item) {
+            return item.socketId === oponentId;
+        });
+        if (exist) {
+            exist.bullets = exist.bullets.filter(function(b) {
+                return b.bulletId !== bulletId;
+            });
+        }
+    }
+
     Map.prototype.updateMap = function(newMap) {
         map = newMap;
         generateArrayForCollitions();
@@ -61,13 +81,16 @@
         var rows = map.length * blockSize;
         var columns = map[0].length * blockSize;
 
-        var color = "red";
+        var color = "white";
         ctx.save();
         ctx.fillStyle = color;
         map.forEach(function(row, x) {
             row.forEach(function(value, y) {
                 if (value) {
                     ctx.drawImage(blockImg, y * blockSize, x * blockSize, blockSize, blockSize);
+                    if (Game.DEBUG) {
+                        ctx.fillText(y + "," + x, (y * blockSize) + 5, (x * blockSize) + (blockSize / 2));
+                    }
                 }
             });
         });
@@ -104,15 +127,17 @@
         context.drawImage(this.image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 
         oponents.forEach(function(item) {
+            item.drawBullets(context, sx, sy);
             item.draw(context, sx, sy);
+            item.clearBullets(world);
         });
     }
 
     Map.prototype.canIMoveTo = function(player, direction) {
 
         var model = {
-            x: player.x,
-            y: player.y,
+            x: player.x - 15,
+            y: player.y - 10,
             width: player.width,
             height: player.height
         };
@@ -134,6 +159,20 @@
 
         var collition = intersectWithArray(model, mapCollition);
         return collition === 0;
+    }
+
+    Map.prototype.detectCollition = function(currentPlayer) {
+        var collition = null;
+        for (var i = 0; i < currentPlayer.bullets.length; i++) {
+            var bullet = currentPlayer.bullets[i];
+            var collition = intersectWithArray(bullet, oponents);
+            if (collition) {
+                collition.bulletId = bullet.bulletId;
+                currentPlayer.bullets.splice(i, 1);
+                break;
+            }
+        }
+        return collition;
     }
 
     //private functions 

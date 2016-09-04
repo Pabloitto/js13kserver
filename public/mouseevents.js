@@ -16,6 +16,9 @@ Game.MouseEventListener = function(o) {
     }
 
     function onMouseClick(e) {
+
+        e.preventDefault();
+
         var x = getFixedX(e),
             y = getFixedY(e);
         o.onClick(x, y, e.button);

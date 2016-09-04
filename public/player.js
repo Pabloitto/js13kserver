@@ -22,6 +22,7 @@
         this.vy = 0;
         this.xView = 0;
         this.yView = 0;
+        this.bullets = [];
         Game.ImageFactory.loadImage("player");
     }
 
@@ -60,15 +61,36 @@
         }
     }
 
+    Player.prototype.shot = function(e) {
+        var bullet = new Game.Bullet({
+            origin: { x: this.x + (this.width / 2), y: this.y + (this.height / 2) },
+            target: { x: e.x, y: e.y }
+        });
+        if (this.bullets.length < 10) {
+            this.bullets.push(bullet);
+        }
+        return bullet.bulletId;
+    };
+
+    Player.prototype.clearBullets = function(world) {
+        for (var i = 0; i < this.bullets.length; i++) {
+            if (this.isNotInCanvas(this.bullets[i], world)) {
+                this.bullets.splice(i, 1);
+            }
+        }
+    }
+
+    Player.prototype.isNotInCanvas = function(s, world) {
+        return (s.x > world.width || s.x < 0) || (s.y > world.height || s.y < 0);
+    }
+
+
     Player.prototype.calculateAngle = function(xTarget, yTarget) {
-        return Math.atan2(yTarget - (this.y - this.yView), xTarget - (this.x - this.xView)) * 180 / Math.PI;
+        return Game.calculateAngle(xTarget, yTarget, (this.x - this.xView), (this.y - this.yView));
     }
 
     Player.prototype.calculateDirection = function(vectors) {
-        var angle = this.calculateAngle(vectors.target.x, vectors.target.y),
-            radians = angle * Math.PI / 180;
-        this.vx = Math.cos(radians) * this.speed;
-        this.vy = Math.sin(radians) * this.speed;
+        Game.calculateDirection(vectors, this);
     }
 
     Player.prototype.draw = function(context, pxView, pyView) {
@@ -76,8 +98,11 @@
         this.yView = pyView || 0;
         context.save();
         context.fillStyle = "white";
-        //context.fillText((~~this.x) + " " + (~~this.y), this.x - this.xView, this.y - this.height - this.yView);
-        context.fillText(this.name,  this.x - this.xView, this.y - this.height - this.yView);
+        if (Game.DEBUG) {
+            context.fillText((~~this.x) + " " + (~~this.y), this.x - this.xView, this.y - this.height - this.yView);
+        } else {
+            context.fillText(this.name, this.x - this.xView, this.y - this.height - this.yView);
+        }
         if (playerImg === null) {
             playerImg = Game.ImageFactory.getImage("player");
         }
@@ -90,7 +115,19 @@
             this.height, -(this.width / 2), -(this.height / 2),
             this.width,
             this.height);
+        if (Game.DEBUG) {
+            context.strokeRect(-(this.width / 2), -(this.height / 2), this.width, this.height);
+        }
         context.restore();
+    }
+
+    Player.prototype.drawBullets = function(context, sX, sY) {
+        if (this.bullets.length === 0) {
+            return;
+        }
+        this.bullets.forEach(function(bullet) {
+            bullet.draw(context, sX, sY);
+        });
     }
 
     Game.Player = Player;
