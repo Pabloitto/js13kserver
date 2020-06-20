@@ -43,7 +43,7 @@ window.addEventListener("load", function() {
 
     function update() {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        var thisSocket = "/#" + socket.id;
+        var thisSocket = socket.id;
 
         players.forEach(function(item) {
             if (item.socketId === thisSocket) {
@@ -125,7 +125,7 @@ window.addEventListener("load", function() {
     }
 
     function getCurrentPlayer() {
-        var thisSocket = "/#" + socket.id;
+        var thisSocket = socket.id;
         var playerContainer = players.find(function(item) {
             return item.socketId === thisSocket;
         });
@@ -200,7 +200,7 @@ window.addEventListener("load", function() {
         });
 
         socket.on("updateItem", function(player) {
-            if (player.socketId === "/#" + socket.id) {
+            if (player.socketId === socket.id) {
                 return;
             }
             var exist = players.find(function(item) {
@@ -219,7 +219,7 @@ window.addEventListener("load", function() {
         });
 
         socket.on("updateShot", function(p) {
-            if (p.data.player.socketId === "/#" + socket.id) {
+            if (p.data.player.socketId === socket.id) {
                 return;
             }
             var bullet = new Game.Bullet(p.data.vector);
@@ -228,7 +228,7 @@ window.addEventListener("load", function() {
         });
 
         socket.on("handleCollition", function(p) {
-            if (p.data.socketId === "/#" + socket.id) {
+            if (p.data.socketId === socket.id) {
                 return;
             }
 
